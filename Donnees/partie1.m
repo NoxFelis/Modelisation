@@ -16,8 +16,9 @@ end
 imag = reshape(imag,[],3);
 imag = cast(imag, "double");
 centers1 =repmat(centers1,[1 1 10]);
+m = 1;
 
-[cidx,ctrs,sumd,D]=kmeans(imag,K,'dist','sqEuclidean','emptyaction','drop','rep', 10, 'start',centers1,'disp','final');
+[cidx,ctrs,sumd,D]=kmeans(imag,K,'dist','custom',m,'emptyaction','drop','rep', 10, 'start',centers1,'disp','final');
 
 figure
 imag = reshape(imag,r,c, 3);
