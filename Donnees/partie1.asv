@@ -30,7 +30,7 @@ lig_prim = 0;
 
 for i=1:K
     kmeans(lig*S+1:(lig+1)*S,col*S+1:(col+1)*S) = i;
-    bout_r = (lig+1)*S;
+    bout_r = (lig+1)*S
     if (r-bout_r)<S
         bout_r = r;
         kmeans((lig+1)*S:bout_r,col*S+1:(col+1)*S) = i;
@@ -62,7 +62,7 @@ end
 
 
 E = Inf;
-ncenters = centers1;
+
 %distance renvoie la distance proportionalisée des anciens centres aux
 %nouveaux
 while (E>Seuil) 
@@ -87,10 +87,10 @@ while (E>Seuil)
         for j=1:c
             % pour chaque pixel, choisir nouvelle classe dans voisinage
             % 2Sx2S qui minimise Ds = d_lab + m/S *d_xy
-            %vois = imag(max(i-S,1):min(i+S,size(imag,1)), max(j-S,1):min(j+S,size(imag,2)),:);
-            %vois_classe = kmeans(max(i-S,1):min(i+S,size(kmeans,1)), max(j-S,1):min(j+S,size(kmeans,2)));
-            [new_class,x,y] = distance(i,j,imag,S,m,kmeans);
-            
+            vois = imag(max(i-S,1):min(i+S,size(imag,1)), max(j-S,1):min(j+S,size(imag,2)),:);
+            vois_classe = kmeans(max(i-S,1):min(i+S,size(kmeans,1)), max(j-S,1):min(j+S,size(kmeans,2)));
+            d_lab = distance_lab(i,j,imag,S);
+            d_xy
         end
     end
     % Mise à jour des centres
