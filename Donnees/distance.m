@@ -1,6 +1,7 @@
 function [new_class,x,y] = distance(i,j,imag,S,m,kmeans)
     new_class = kmeans(i,j);
-    x,y = i,j;
+    x= i;
+    y = j;
     pixel = imag(i,j,:);
     dist = Inf;
     for k=max(i-S,1):min(i+S,size(imag,1))

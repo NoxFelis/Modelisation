@@ -1,5 +1,7 @@
 clear all;
 close all;
+load('mask.mat');
+script_lecture_masque;
 
 %récupérer l'image
 imag = imread("images/D000.ppm");
@@ -8,12 +10,13 @@ imshow(imag)
 
 %définir les variables principales
 
-[r,c,~] = size(imag);               % format de l'image
+[r,c,nb_chan] = size(imag);               % format de l'image
 K = 108;                            % nombre de superpixels
 N = size(imag,2) * size(imag,1);    % nombre de pixels tot
 centers1 = zeros(K,5);              % position et valeur des centres 
 m = 10;                             % pour le poids de la distance dans l'algo
 Seuil = 10;                         % seuil de sortie de l'algorithme SLIC
+max_iter = 1000;                    % nombre max d'itération
 
 
 imag = cast(imag, 'double');
@@ -53,6 +56,17 @@ for i=1:K
 end
 
 % affinement à rajouter (voir slides p2)
+%% %%%% Partie affinement %%%%%%%%%% %%
+for t=1:size(centers1, 1)
+    grad = imgradient(imag(centers1(t,4)-1:centers1(t,4)+1, centers1(t,5)-1:centers1(t,5)+1), 'prewitt'); % les coordonnes
+    minGrad = min(grad(:));
+    [ci, cj] = find(grad == minGrad);
+    centers1(t, 4:5) = [centers1(t,4)+ci(1)-2, centers1(t,5)+cj(1)-2];
+
+end
+
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %%
+
 
 % imag = reshape(imag,[],3);
 % imag = cast(imag, "double");
@@ -63,9 +77,11 @@ end
 
 E = Inf;
 ncenters = centers1;
+q = 0;
 %distance renvoie la distance proportionalisée des anciens centres aux
 %nouveaux
-while (E>Seuil) 
+%% Ajouter nb_iterations dans le while ??
+while (E>Seuil && q<max_iter) 
 %     nb = zeros(K,1);
 %     centers2 = nbar;
 %     centers1 = imag(centers2(:,1),centers2(:,2),:);
@@ -82,20 +98,43 @@ while (E>Seuil)
 %     end
 %     nbar = nbar./nb;
 %     inter = nbar;
-    % Calcul des superpixels
-    for i=1:r
-        for j=1:c
-            % pour chaque pixel, choisir nouvelle classe dans voisinage
-            % 2Sx2S qui minimise Ds = d_lab + m/S *d_xy
-            %vois = imag(max(i-S,1):min(i+S,size(imag,1)), max(j-S,1):min(j+S,size(imag,2)),:);
-            %vois_classe = kmeans(max(i-S,1):min(i+S,size(kmeans,1)), max(j-S,1):min(j+S,size(kmeans,2)));
-            [new_class,x,y] = distance(i,j,imag,S,m,kmeans);
-            
-        end
-    end
-    % Mise à jour des centres
-    % Calcul de E (erreur résiduelle) (erreur quadratique moyenne?)
 
+    % Calcul des superpixels
+%     for i=1:r
+%         for j=1:c
+%             % pour chaque pixel, choisir nouvelle classe dans voisinage
+%                 % 2Sx2S qui minimise Ds = d_lab + m/S *d_xy
+%                 %vois = imag(max(i-S,1):min(i+S,size(imag,1)), max(j-S,1):min(j+S,size(imag,2)),:);
+%                 %vois_classe = kmeans(max(i-S,1):min(i+S,size(kmeans,1)), max(j-S,1):min(j+S,size(kmeans,2)));
+%             [new_class,x,y] = distance(i,j,imag,S,m,kmeans);
+%             %on fait quoi avec new_class ??
+%         end
+%     end
+    % Mise à jour des centres
+    E = zeros(K,1);
+    for t=1:K
+        cluster_t = find(kmeans == t);
+        moy_color = zeros(nb_chan,1);
+        for chan=1:nb_chan
+            I_chan = imag(:,:,chan);
+            I_vect = I_chan(:);
+            I_vect(cluster_t);
+            moy_color(chan) = sum(I_vect(cluster_t))/size(cluster_t,1);
+        end
+        [row, col] = ind2sub([c,r],cluster_t);
+        % Calcul de E (erreur résiduelle) (erreur quadratique moyenne?)
+        moy_x = sum(row)/size(cluster_t,1);
+        moy_y = sum(col)/size(cluster_t,1);
+           
+        new_t =  [moy_color', moy_x, moy_y];
+        %mettre les bons elements dans distance
+      %  E(t)  = distance(centers1(t,:), moy_x, moy_y, moy_color, S);
+        ncenters(t,:) = new_t;
+           
+    end
+
+
+    q = q+1;
 end
 
 
