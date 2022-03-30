@@ -45,11 +45,24 @@ figure
 t = contour_indices(1);
 autour = contour(1:t,:);
 [vx vy] = voronoi(autour(:,1), autour(:,2))
-in = inpolygon(vx,vy, autour(:,1),autour(:,2));
+% [in1, on1] = inpolygon(vx(1,:),vy(1,:),autour(:,1),autour(:,2));
+% [in2, on2] = inpolygon(vx(2,:),vy(2,:),autour(:,1),autour(:,2));
+% in = in1 + in2;
+% inside = find(in == 2);
+% vx2 = vx(inside);
+% vy2 = vy(inside);
 
-plot(vx,vy,'-b',autour(:,1),autour(:,2),'.r');
+plot(vx,vy,'*b',autour(:,1),autour(:,2),polyshape'.r',vx2,vy2,'*g');
 %voronoi(autour(:,1), autour(:,2))
 %DT = delaunay(autour(:,1),autour(:,2))
 %triplot(DT,autour(:,1),autour(:,2));
 hold on;
+close all
+
+figure
+for i=1:size(autour,1)
+    plot(autour(i,1),autour(i,2), '*r');
+    hold on;
+    pause(0.2);
+end
 

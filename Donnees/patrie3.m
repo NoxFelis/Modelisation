@@ -41,15 +41,26 @@ for i=1:pic
 %     close all;
 end
 
-figure
-t = contour_indices(1);
-autour = contour(1:t,:);
-[vx vy] = voronoi(autour(:,1), autour(:,2))
-in = inpolygon(vx,vy, autour(:,1),autour(:,2));
 
-plot(vx,vy,'-b',autour(:,1),autour(:,2),'.r');
-%voronoi(autour(:,1), autour(:,2))
-%DT = delaunay(autour(:,1),autour(:,2))
-%triplot(DT,autour(:,1),autour(:,2));
-hold on;
-
+t = 0;
+for i=1:pic
+    long = contour_indices(i);
+    autour = contour(t+1:t+long,:);
+    [vx vy] = voronoi(autour(:,1), autour(:,2));
+    
+    
+    % transforme godzilla en polygone
+    pgon = polyshape(autour(:,1), autour(:,2));
+    in1 = isinterior(pgon, vx(1,:),vy(1,:));
+    in2 = isinterior(pgon, vx(2,:),vy(2,:));
+    in = in1+in2;
+    in = in==2;
+    figure
+    plot(vx(:,in),vy(:,in),'-b',autour(:,1),autour(:,2),'.r');
+    %voronoi(autour(:,1), autour(:,2))
+    %DT = delaunay(autour(:,1),autour(:,2))
+    %triplot(DT,autour(:,1),autour(:,2));
+    t = t+long;
+    pause
+    close all
+end
