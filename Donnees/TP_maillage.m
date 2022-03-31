@@ -1,6 +1,7 @@
 clear;
 close all;
-nb_images = 36; % Nombre d'images
+% Nombre d'images utilisees
+nb_images = 36; 
 
 % chargement des images
 for i = 1:nb_images
@@ -9,11 +10,56 @@ for i = 1:nb_images
     else
         nom = sprintf('images/viff.0%d.ppm',i-1);
     end;
-    % L'ensemble des images de taille : nb_lignes x nb_colonnes x nb_canaux
-    % x nb_images
+    % im est une matrice de dimension 4 qui contient 
+    % l'ensemble des images couleur de taille : nb_lignes x nb_colonnes x nb_canaux 
+    % im est donc de dimension nb_lignes x nb_colonnes x nb_canaux x nb_images
     im(:,:,:,i) = imread(nom); 
 end;
-% chargement des points 2D suivis
+
+% Affichage des images
+figure; 
+subplot(2,2,1); imshow(im(:,:,:,1)); title('Image 1');
+subplot(2,2,2); imshow(im(:,:,:,9)); title('Image 9');
+subplot(2,2,3); imshow(im(:,:,:,17)); title('Image 17');
+subplot(2,2,4); imshow(im(:,:,:,25)); title('Image 25');
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% A COMPLETER                                             %
+% Calculs des superpixels                                 % 
+% Conseil : afficher les germes + les régions             %
+% à chaque étape / à chaque itération                     %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% ........................................................%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% A COMPLETER                                             %
+% Binarisation de l'image à partir des superpixels        %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% ........................................................%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% A FAIRE SI VOUS UTILISEZ LES MASQUES BINAIRES FOURNIS   %
+% Chargement des masques binaires                         %
+% de taille nb_lignes x nb_colonnes x nb_images           %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ... 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% A DECOMMENTER ET COMPLETER                              %
+% quand vous aurez les images segmentées                  %
+% Affichage des masques associes                          %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% figure;
+% subplot(2,2,1); ... ; title('Masque image 1');
+% subplot(2,2,2); ... ; title('Masque image 9');
+% subplot(2,2,3); ... ; title('Masque image 17');
+% subplot(2,2,4); ... ; title('Masque image 25');
+
+% chargement des points 2D suivis 
 % pts de taille nb_points x (2 x nb_images)
 % sur chaque ligne de pts 
 % tous les appariements possibles pour un point 3D donne
@@ -24,30 +70,11 @@ pts = load('viff.xy');
 % Chaque P{i} contient la matrice de projection associee a l'image i 
 % RAPPEL : P{i} est de taille 3 x 4
 load dino_Ps;
-% chargement des masques (pour l'elimination des fonds bleus)
-% de taille nb_lignes x nb_colonnes x nb_images
-% A COMPLETER quand vous aurez termine la premiere partie permettant de
-% binariser les images
-% ... 
-
-% Affichage des images
-figure; 
-subplot(2,2,1); imshow(im(:,:,:,1)); title('Image 1');
-subplot(2,2,2); imshow(im(:,:,:,9)); title('Image 9');
-subplot(2,2,3); imshow(im(:,:,:,17)); title('Image 17');
-subplot(2,2,4); imshow(im(:,:,:,25)); title('Image 25');
-
-% Affichage des masques associes
-% figure;
-% subplot(2,2,1); ... ; title('Masque image 1');
-% subplot(2,2,2); ... ; title('Masque image 9');
-% subplot(2,2,3); ... ; title('Masque image 17');
-% subplot(2,2,4); ... ; title('Masque image 25');
 
 % Reconstruction des points 3D
 X = []; % Contient les coordonnees des points en 3D
 color = []; % Contient la couleur associee
-% Pour chaque coupple de points apparies
+% Pour chaque couple de points apparies
 for i = 1:size(pts,1)
     % Recuperation des ensembles de points apparies
     l = find(pts(i,1:2:end)~=-1);
@@ -80,9 +107,11 @@ for i = 1:size(X,2)
 end;
 axis equal;
 
-% A COMPLETER
-% Tetraedrisation de Delaunay
-% T = ...
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% A COMPLETER                  %
+% Tetraedrisation de Delaunay  %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% T = ...                      
 
 % A DECOMMENTER POUR AFFICHER LE MAILLAGE
 % fprintf('Tetraedrisation terminee : %d tetraedres trouves. \n',size(T,1));
@@ -90,8 +119,9 @@ axis equal;
 % figure;
 % tetramesh(T);
 
-% A DECOMMENTER ET A COMPLETER
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% A DECOMMENTER ET A COMPLETER %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Calcul des barycentres de chacun des tetraedres
 % poids = ... 
 % nb_barycentres = ... 
@@ -115,8 +145,9 @@ axis equal;
 %    end
 %end
 
-
-% A DECOMMENTER ET A COMPLETER
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% A DECOMMENTER ET A COMPLETER %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Copie de la triangulation pour pouvoir supprimer des tetraedres
 % tri=T.Triangulation;
 % Retrait des tetraedres dont au moins un des barycentres 

@@ -46,13 +46,31 @@ t = 0;
 for i=1:pic
     long = contour_indices(i);
     autour = contour(t+1:t+long,:);
+    C = [1:long ; 2:long+1]';
+    C(end,2) = 1;
     [vx vy] = voronoi(autour(:,1), autour(:,2));
+    DT = delaunayTriangulation(autour(:,1),autour(:,2), C);
+    IO = isInterior(DT);
+    triplot(DT(IO,:), DT.Points(:,1),DT.Points(:,2))
     
     
+    tr = triangulation(DT(IO,:),DT.Points);
+    numt = size(tr,1);
+    T = (1:numt)';
+    neigh = neighbors(tr);
+    cc = circumcenter(tr);
+    xcc = cc(:,1);
+    ycc = cc(:,2);
+    idx1 = T < neigh(:,1);
+    idx2 = T < neigh(:,2);
+    idx3 = T < neigh(:,3);
+    neigh = [T(idx1) neigh(idx1,1); T(idx2) neigh(idx2,2); T(idx3) neigh(idx3,3)]';
+ 
     % transforme godzilla en polygone
     pgon = polyshape(autour(:,1), autour(:,2));
     in1 = isinterior(pgon, vx(1,:),vy(1,:));
     in2 = isinterior(pgon, vx(2,:),vy(2,:));
+    
     in = in1+in2;
     in = in==2;
     figure
@@ -61,6 +79,9 @@ for i=1:pic
     %DT = delaunay(autour(:,1),autour(:,2))
     %triplot(DT,autour(:,1),autour(:,2));
     t = t+long;
+    hold on
+    plot(xcc(neigh), ycc(neigh), '-g','LineWidth',1.5)
+
     pause
     close all
 end
