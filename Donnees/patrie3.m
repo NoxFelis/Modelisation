@@ -44,14 +44,17 @@ end
 
 t = 0;
 for i=1:pic
-    long = contour_indices(i);
-    autour = contour(t+1:t+long,:);
+    long_full = contour_indices(i);
+    autour_full = contour(t+1:t+long_full,:);
+    autour = autour_full([1:10:end],:);
+    long = size(autour,1);
     C = [1:long ; 2:long+1]';
     C(end,2) = 1;
     [vx vy] = voronoi(autour(:,1), autour(:,2));
     DT = delaunayTriangulation(autour(:,1),autour(:,2), C);
     IO = isInterior(DT);
     triplot(DT(IO,:), DT.Points(:,1),DT.Points(:,2))
+    
     
     
     tr = triangulation(DT(IO,:),DT.Points);
@@ -74,13 +77,13 @@ for i=1:pic
     in = in1+in2;
     in = in==2;
     figure
-    plot(vx(:,in),vy(:,in),'-b',autour(:,1),autour(:,2),'.r');
+    plot(vx(:,in),vy(:,in),'-b',autour_full(:,1),autour_full(:,2),'.r');
     %voronoi(autour(:,1), autour(:,2))
     %DT = delaunay(autour(:,1),autour(:,2))
     %triplot(DT,autour(:,1),autour(:,2));
-    t = t+long;
-    hold on
-    plot(xcc(neigh), ycc(neigh), '-g','LineWidth',1.5)
+    t = t+long_full;
+    %hold on
+    %plot(xcc(neigh), ycc(neigh), '-g','LineWidth',1.5)
 
     pause
     close all
