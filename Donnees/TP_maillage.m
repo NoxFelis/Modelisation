@@ -56,7 +56,7 @@ for e=1:nb_images
     lig = 0;
     col = 0;
     lig_prim = 0;
-
+    
     %pour chaque superpixel
     for i=1:K
         % on remplie dans kmeans les pixels appartenant à cette classe
@@ -88,7 +88,8 @@ for e=1:nb_images
         centers1(i,4:5,e) = floor([(lig*S+1+bout_r)/2 (col*S+1+bout_c)/2]);
         % il faudrait probablement plutot faire la couleur moyenne
         zone = imag(lig*S+1:bout_r,col*S+1:bout_c,:);
-        centers1(i,1:3,e) = mean(reshape(zone,size(zone,1)*size(zone,2),size(zone,3)));
+        %centers1(i,1:3,e) = mean(reshape(zone,size(zone,1)*size(zone,2),size(zone,3)));
+        centers1(i,1:3,e) = imag(centers1(i,4,e),centers1(i,5,e));
         col = col_prim;
         lig = lig_prim;
     end
@@ -126,30 +127,31 @@ subplot(2,2,4); imshow(imoverlay(im(:,:,:,25),BW25,'red')); title('Image 25 with
 
 % Algorithme SLIC
 
-
+figure1=figure;
 for e=1:1
     imag = cast(im(:,:,:,e), 'double');
     % Variables globales
     E = Inf;                            % Erreur
     ncenters = centers1(:,:,e);         % centres intermédiaires
     q = 0;                              % nombre initial de tours
-    nkmeans = kmeans(:,:,e);           % kmeans intermédiaire
+    nkmeans = kmeans(:,:,e);            % kmeans intermédiaire
+    initial = kmeans(:,:,e);
 
-
+    title('image');
     % tant que l'on n'atteint pas le seuil ou le nombre d'itérations max
     while (E>Seuil && q<max_iter)
         centers = ncenters;
         kmeans_e = nkmeans;
         ncenters = zeros(K,5);
         nombre = zeros(K,1);
-
+        
         % Calcul des superpixels
         % pour chaque pixel
         for i=1:r
             for j=1:c
                 % on choisit s'il n'y a pas une classe dans un voisinage
                 % 2S*2S qui ne serait pas plus proche
-                new_class = distance(i,j,imag(i,j,:),centers,S,m,kmeans_e);
+                new_class = distance(i,j,imag(i,j,:),centers,S,m,kmeans_e)
                 % on met à jour dans nkmeans
                 nkmeans(r,c) = new_class;
                 % on prépare le calcul des nouveau centres
@@ -157,6 +159,8 @@ for e=1:1
                 nombre(new_class) = nombre(new_class) +1;
             end
         end
+        sum(sum(1-(nkmeans==initial)))
+
         % Mise à jour des centres
         ncenters = ncenters./nombre;
 
@@ -166,9 +170,17 @@ for e=1:1
             Error(t) = distance_centers(centers(t,:),ncenters(t,:),S,m);
         end
         E = max(Error);
+        hold off;
+        BW = boundarymask(nkmeans);
+        imshow(imoverlay(im(:,:,:,e),BW,'red'));
+        hold on;
+        plot(centers(:,5),centers(:,4), '.g');
+        pause(0.2);
+        
         
         q = q+1;
     end
+    close figure1;
 end
 a=0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
