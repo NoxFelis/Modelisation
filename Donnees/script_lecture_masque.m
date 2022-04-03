@@ -1,4 +1,4 @@
-clear all;
+%clear all;
 close all;
 nb_images = 36; % Nombre d'images
 

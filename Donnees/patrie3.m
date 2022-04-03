@@ -30,15 +30,15 @@ for i=1:pic
     autour = bwtraceboundary(im_mask(:,:,i),[r_depart c_depart], 'N');
     contour_indices(i) = size(autour,1);            % donne la longueur du vecteurs d'indices de contours
     contour = [contour ; autour];
-%     figure
-%     axis on;
-%     imshow(im_mask(:,:,i))
-%     hold on;
-%     plot(c_depart, r_depart, 'r+', 'MarkerSize', 5, 'Linewidth', 2); %attention c'est inversé à l'affichage
-%     hold on;
-%     plot(autour(:,2),autour(:,1),'g','LineWidth',4);
-%     pause
-%     close all;
+    figure
+    axis on;
+    imshow(im_mask(:,:,i))
+    hold on;
+    plot(c_depart, r_depart, 'r+', 'MarkerSize', 5, 'Linewidth', 2); %attention c'est inversé à l'affichage
+    hold on;
+    plot(autour(:,2),autour(:,1),'g','LineWidth',4);
+    pause
+    close all;
 end
 
 
@@ -57,17 +57,17 @@ for i=1:pic
     
     
     
-    tr = triangulation(DT(IO,:),DT.Points);
-    numt = size(tr,1);
-    T = (1:numt)';
-    neigh = neighbors(tr);
-    cc = circumcenter(tr);
-    xcc = cc(:,1);
-    ycc = cc(:,2);
-    idx1 = T < neigh(:,1);
-    idx2 = T < neigh(:,2);
-    idx3 = T < neigh(:,3);
-    neigh = [T(idx1) neigh(idx1,1); T(idx2) neigh(idx2,2); T(idx3) neigh(idx3,3)]';
+%     tr = triangulation(DT(IO,:),DT.Points);
+%     numt = size(tr,1);
+%     T = (1:numt)';
+%     neigh = neighbors(tr);
+%     cc = circumcenter(tr);
+%     xcc = cc(:,1);
+%     ycc = cc(:,2);
+%     idx1 = T < neigh(:,1);
+%     idx2 = T < neigh(:,2);
+%     idx3 = T < neigh(:,3);
+%     neigh = [T(idx1) neigh(idx1,1); T(idx2) neigh(idx2,2); T(idx3) neigh(idx3,3)]';
  
     % transforme godzilla en polygone
     pgon = polyshape(autour(:,1), autour(:,2));

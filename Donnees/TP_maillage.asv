@@ -233,28 +233,15 @@ for i=1:nb_images
     elseif (i==9)
         contour9 = autour;    
     elseif (i==17)
-        contour17 = autour;
-    elseif (i==25)
-        contour25 = autour;
+          
+    else if (i==25)
     end
 end
 
 % affichage intermédiaire des contours de masques pour vérification
-figure;
-axis on;
-subplot(2,2,1); imshow(im_mask(:,:,1)); title('Mask 1 with boundary');
-                hold on; plot(contour1(:,2),contour1(:,1),'g','LineWidth',2);
-subplot(2,2,2); imshow(im_mask(:,:,9)); title('Mask 9 with boundary');
-                hold on; plot(contour9(:,2),contour9(:,1),'g','LineWidth',2);
-subplot(2,2,3); imshow(im_mask(:,:,17)); title('Mask 17 with boundary');
-                hold on; plot(contour17(:,2),contour17(:,1),'g','LineWidth',2);
-subplot(2,2,4); imshow(im_mask(:,:,25)); title('Mask 25 with boundary');
-                hold on; plot(contour25(:,2),contour25(:,1),'g','LineWidth',2);
 
 t = 0;                              % sert à noter où dans le vecteur contour nous sommes
 % pour chaque image
-% ATTENTION TROUVER COMMENT TOURNER L'IMAGE
-figure;
 for i=1:nb_images
     % on récupère son contour
     long_full = contour_indices(i);
@@ -284,13 +271,14 @@ for i=1:nb_images
     in = in==2;
 
 
-    
+    figure
     plot(vx(:,in),vy(:,in),'-b',autour_full(:,1),autour_full(:,2),'.r');
+
     % mise à jour de T pour aller au début du contour prochain
     t = t+long_full;
 
     pause
-    hold off
+    close all
 end
 
 
