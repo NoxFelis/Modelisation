@@ -289,7 +289,7 @@ for i=1:nb_images
     % mise à jour de T pour aller au début du contour prochain
     t = t+long_full;
 
-    pause
+    pause(0.1)
     hold off
 end
 
@@ -299,11 +299,14 @@ end
 % quand vous aurez les images segmentées                  %
 % Affichage des masques associes                          %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%inutile à décommenter, c'est fait plus haut
 % figure;
 % subplot(2,2,1); ... ; title('Masque image 1');
 % subplot(2,2,2); ... ; title('Masque image 9');
 % subplot(2,2,3); ... ; title('Masque image 17');
 % subplot(2,2,4); ... ; title('Masque image 25');
+
+
 
 % chargement des points 2D suivis 
 % pts de taille nb_points x (2 x nb_images)
@@ -357,50 +360,69 @@ axis equal;
 % A COMPLETER                  %
 % Tetraedrisation de Delaunay  %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% T = ...                      
+T = delaunayTriangulation(X(1,:)',X(2,:)',X(3,:)');
+
 
 % A DECOMMENTER POUR AFFICHER LE MAILLAGE
-% fprintf('Tetraedrisation terminee : %d tetraedres trouves. \n',size(T,1));
-% Affichage de la tetraedrisation de Delaunay
-% figure;
-% tetramesh(T);
+fprintf('Tetraedrisation terminee : %d tetraedres trouves. \n',size(T,1));
+%Affichage de la tetraedrisation de Delaunay
+figure;
+tetramesh(T);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % A DECOMMENTER ET A COMPLETER %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Calcul des barycentres de chacun des tetraedres
-% poids = ... 
-% nb_barycentres = ... 
-% for i = 1:size(T,1)
+poids = [0.25 0.25 0.25 0.25 ; 0.4 0.2 0.2 0.2 ; 0.2 0.4 0.2 0.2; 0.2 0.2 0.4 0.2; 0.2 0.2 0.2 0.4];
+nb_barycentres = size(poids,1); 
+for i = 1:size(T,1)
     % Calcul des barycentres differents en fonction des poids differents
     % En commencant par le barycentre avec poids uniformes
-%     C_g(:,i,1)=[ ...
-
+    Ti = T(i,:); 
+    Pi = T.Points(Ti,:);
+    for k=1:nb_barycentres
+         C_g(:,i,k) = [(1/4)*sum(Pi.*(poids(k,:)'*ones(1,size(Pi,2))),1) 1]; 
+    end
+end 
 % A DECOMMENTER POUR VERIFICATION 
 % A RE-COMMENTER UNE FOIS LA VERIFICATION FAITE
 % Visualisation pour vérifier le bon calcul des barycentres
-% for i = 1:nb_images
-%    for k = 1:nb_barycentres
-%        o = P{i}*C_g(:,:,k);
-%        o = o./repmat(o(3,:),3,1);
-%        imshow(im_mask(:,:,i));
-%        hold on;
-%        plot(o(2,:),o(1,:),'rx');
-%        pause;
-%        close;
-%    end
-%end
+for i = 1:nb_images
+   for k = 1:nb_barycentres
+       o = P{i}*C_g(:,:,k);
+       o = o./repmat(o(3,:),3,1);
+       imshow(im_mask(:,:,i));
+       hold on;
+       plot(o(2,:),o(1,:),'rx');
+       pause;
+       close;
+   end
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % A DECOMMENTER ET A COMPLETER %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Copie de la triangulation pour pouvoir supprimer des tetraedres
-% tri=T.Triangulation;
+tri=T.Triangulation;
+keep = ones(size(T,1),1);
 % Retrait des tetraedres dont au moins un des barycentres 
 % ne se trouvent pas dans au moins un des masques des images de travail
 % Pour chaque barycentre
-% for k=1:nb_barycentres
-% ...
+for k=1:nb_barycentres
+    % Il faut donc projeter dans chaque masque pour voir
+    o = P{i}*C_g(:,:,k);
+    o = o./repmat(o(3,:),3,1);
+
+    % ON EN EST LA
+%  pgon = polyshape(autour(:,1), autour(:,2));
+%     % on découpe pour ne garder que les segments intérieurs
+%     in1 = isinterior(pgon, vx(1,:),vy(1,:));
+%     in2 = isinterior(pgon, vx(2,:),vy(2,:));
+    %projeter ces barycentres dans tous les masque
+    inside = (im_mask(o(1,:),o(2,1),:) == 1);
+
+    a=0;
+end
 
 % A DECOMMENTER POUR AFFICHER LE MAILLAGE RESULTAT
 % Affichage des tetraedres restants
