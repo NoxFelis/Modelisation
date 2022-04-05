@@ -9,12 +9,12 @@ for i = 1:nb_images
         nom = sprintf('images/viff.00%d.ppm',i-1);
     else
         nom = sprintf('images/viff.0%d.ppm',i-1);
-    end;
+    end
     % im est une matrice de dimension 4 qui contient 
     % l'ensemble des images couleur de taille : nb_lignes x nb_colonnes x nb_canaux 
     % im est donc de dimension nb_lignes x nb_colonnes x nb_canaux x nb_images
     im(:,:,:,i) = imread(nom); 
-end;
+end
 
 % Affichage des images
 figure; 
@@ -127,65 +127,64 @@ subplot(2,2,4); imshow(imoverlay(im(:,:,:,25),BW25,'red')); title('Image 25 with
                 hold on; plot(centers1(:,5,25),centers1(:,4,25), '.g');
 
 % Algorithme SLIC
-% figure1=figure;
-% for e=1:nb_images
-%     imag = cast(im(:,:,:,e), 'double');
-%     % Variables globales
-%     E = Inf;                            % Erreur
-%     ncenters = centers1(:,:,e);         % centres intermédiaires
-%     q = 0;                              % nombre initial de tours
-%     nkmeans = kmeans(:,:,e);            % kmeans intermédiaire
-%     initial = kmeans(:,:,e);
-% 
-%     title('image');
-%     % tant que l'on n'atteint pas le seuil ou le nombre d'itérations max
-%     while (E>Seuil && q<max_iter)
-%         centers = ncenters;
-%         kmeans_e = nkmeans;
-%         ncenters = zeros(K,5);
-%         nombre = zeros(K,1);
-%         
-%         % Calcul des superpixels
-%         % pour chaque pixel
-%         for i=1:r
-%             for j=1:c
-%                 % on choisit s'il n'y a pas une classe dans un voisinage
-%                 % 2S*2S qui ne serait pas plus proche
-%                 new_class = distance(i,j,imag(i,j,:),centers,2*S,m,kmeans_e);
-%                 % on met à jour dans nkmeans
-%                 nkmeans(r,c) = new_class;
-%                 % on prépare le calcul des nouveau centres
-%                 ncenters(new_class,:) = ncenters(new_class,:) + [imag(i,j,1) imag(i,j,2) imag(i,j,3) i j];
-%                 nombre(new_class) = nombre(new_class) +1;
-%             end
-%         end
-%         % à enlever, juste de la vérification
-%         sum(sum(1-(nkmeans==initial)))
-% 
-%         % Mise à jour des centres
-%         ncenters = ncenters./nombre;
-% 
-%         % Calcul de E (erreur résiduelle)
-%         Error = zeros(K,1);
-%         for t=1:K
-%             Error(t) = distance_centers(centers(t,:),ncenters(t,:),S,m);
-%         end
-%         E = max(Error);
-% 
-%         hold off;
-%         BW = boundarymask(nkmeans);
-%         imshow(imoverlay(im(:,:,:,e),BW,'red'));
-%         hold on;
-%         plot(ncenters(:,5),ncenters(:,4), '.g');
-%         pause(0.2);
-%         
-%         
-%         q = q+1;
-%     end
-%     kmeans(:,:,e) = nkmeans;
-%     close figure1;
-% end
-% a=0;
+figure1=figure;
+for e=1:1
+    imag = cast(im(:,:,:,e), 'double');
+    % Variables globales
+    E = Inf;                            % Erreur
+    ncenters = centers1(:,:,e);         % centres intermédiaires
+    q = 0;                              % nombre initial de tours
+    nkmeans = kmeans(:,:,e);            % kmeans intermédiaire
+    initial = kmeans(:,:,e);
+
+    title('image');
+    % tant que l'on n'atteint pas le seuil ou le nombre d'itérations max
+    while (E>Seuil && q<max_iter)
+        centers = ncenters;
+        kmeans_e = nkmeans;
+        ncenters = zeros(K,5);
+        nombre = zeros(K,1);
+        
+        % Calcul des superpixels
+        % pour chaque pixel
+        for i=1:r
+            for j=1:c
+                % on choisit s'il n'y a pas une classe dans un voisinage
+                % 2S*2S qui ne serait pas plus proche
+                new_class = distance(i,j,imag(i,j,:),centers,S,m,kmeans_e);
+                % on met à jour dans nkmeans
+                nkmeans(r,c) = new_class;
+                % on prépare le calcul des nouveau centres
+                ncenters(new_class,:) = ncenters(new_class,:) + [imag(i,j,1) imag(i,j,2) imag(i,j,3) i j];
+                nombre(new_class) = nombre(new_class) +1;
+            end
+        end
+        % à enlever, juste de la vérification
+        sum(sum(1-(nkmeans==initial)))
+
+        % Mise à jour des centres
+        ncenters = ncenters./nombre;
+
+        % Calcul de E (erreur résiduelle)
+        Error = zeros(K,1);
+        for t=1:K
+            Error(t) = distance_centers(centers(t,:),ncenters(t,:),S,m);
+        end
+        E = max(Error);
+        
+        
+        hold off;
+        BW = boundarymask(nkmeans);
+        imshow(imoverlay(im(:,:,:,e),BW,'red'));
+        hold on;
+        plot(ncenters(:,5),ncenters(:,4), '.g');
+        pause(0.02);
+        
+        q = q+1;
+    end
+    kmeans(:,:,e) = nkmeans;
+    %close;
+end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -274,7 +273,7 @@ for i=1:nb_images
 %     triplot(DT(IO,:), DT.Points(:,1),DT.Points(:,2))
 
     % Voronoï et découpage pour ne garder que l'intérieur
-    [vx vy] = voronoi(autour(:,1), autour(:,2));
+    [vx,vy] = voronoi(autour(:,1), autour(:,2));
     % transforme godzilla en polygone
     pgon = polyshape(autour(:,1), autour(:,2));
     % on découpe pour ne garder que les segments intérieurs
@@ -328,7 +327,7 @@ for i = 1:size(pts,1)
     % Recuperation des ensembles de points apparies
     l = find(pts(i,1:2:end)~=-1);
     % Verification qu'il existe bien des points apparies dans cette image
-    if size(l,2) > 1 & max(l)-min(l) > 1 & max(l)-min(l) < 36
+    if size(l,2) > 1 && max(l)-min(l) > 1 && max(l)-min(l) < 36
         A = [];
         R = 0;
         G = 0;
@@ -340,12 +339,12 @@ for i = 1:size(pts,1)
             R = R + double(im(int16(pts(i,(j-1)*2+1)),int16(pts(i,(j-1)*2+2)),1,j));
             G = G + double(im(int16(pts(i,(j-1)*2+1)),int16(pts(i,(j-1)*2+2)),2,j));
             B = B + double(im(int16(pts(i,(j-1)*2+1)),int16(pts(i,(j-1)*2+2)),3,j));
-        end;
+        end
         [U,S,V] = svd(A);
         X = [X V(:,end)/V(end,end)];
         color = [color [R/size(l,2);G/size(l,2);B/size(l,2)]];
-    end;
-end;
+    end
+end
 fprintf('Calcul des points 3D termine : %d points trouves. \n',size(X,2));
 
 %affichage du nuage de points 3D
@@ -353,7 +352,7 @@ figure;
 hold on;
 for i = 1:size(X,2)
     plot3(X(1,i),X(2,i),X(3,i),'.','col',color(:,i)/255);
-end;
+end
 axis equal;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -381,9 +380,11 @@ for i = 1:size(T,1)
     Ti = T(i,:); 
     Pi = T.Points(Ti,:);
     for k=1:nb_barycentres
-         C_g(:,i,k) = [(1/4)*sum(Pi.*(poids(k,:)'*ones(1,size(Pi,2))),1) 1]; 
+         C_g(:,i,k) = [sum(Pi.*(poids(k,:)'*ones(1,size(Pi,2))),1) 1]; 
     end
 end 
+
+figure;
 % A DECOMMENTER POUR VERIFICATION 
 % A RE-COMMENTER UNE FOIS LA VERIFICATION FAITE
 % Visualisation pour vérifier le bon calcul des barycentres
@@ -394,8 +395,8 @@ for i = 1:nb_images
        imshow(im_mask(:,:,i));
        hold on;
        plot(o(2,:),o(1,:),'rx');
-       pause;
-       close;
+       pause(0.02);
+       hold off;
    end
 end
 
@@ -403,35 +404,53 @@ end
 % A DECOMMENTER ET A COMPLETER %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Copie de la triangulation pour pouvoir supprimer des tetraedres
-tri=T.Triangulation;
-keep = ones(size(T,1),1);
+Tbis=triangulation(T.ConnectivityList,T.Points);
+keep = true(size(T,1),1);
 % Retrait des tetraedres dont au moins un des barycentres 
 % ne se trouvent pas dans au moins un des masques des images de travail
-% Pour chaque barycentre
-for k=1:nb_barycentres
-    % Il faut donc projeter dans chaque masque pour voir
-    o = P{i}*C_g(:,:,k);
-    o = o./repmat(o(3,:),3,1);
-
-    % ON EN EST LA
-%  pgon = polyshape(autour(:,1), autour(:,2));
-%     % on découpe pour ne garder que les segments intérieurs
-%     in1 = isinterior(pgon, vx(1,:),vy(1,:));
-%     in2 = isinterior(pgon, vx(2,:),vy(2,:));
-    %projeter ces barycentres dans tous les masque
-    inside = (im_mask(o(1,:),o(2,1),:) == 1);
-
-    a=0;
+% Pour chaque tétraèdre
+for t=1:size(T,1)
+     % récupère les barycentres du tétraèdre
+     barycentre = C_g(:,t,:);
+     % pour chaque image
+     inside_image = true;
+     for image=1:nb_images
+         % pour chaque barycentre
+         inside_barycentre = true;
+         for b=1:nb_barycentres
+            % projeter barycentre sur l'image
+            projection = P{image}*barycentre(:,b);
+            projection = projection./projection(3);
+            if (projection(1)>=1 && projection(2)>=1 && projection(1)<=r && projection(2)<=c)
+                if (im_mask(round(projection(1)),round(projection(2)),image)== 0)
+                    inside_barycentre = false;
+                    break;
+                end
+            end
+         end
+        if inside_barycentre == false
+            inside_image = false;
+            break;
+        end
+     end
+     if (inside_image==false) 
+         keep(t) = 0;
+     end
 end
+
+Tbis = Tbis(keep,:);
+
+
+
 
 % A DECOMMENTER POUR AFFICHER LE MAILLAGE RESULTAT
 % Affichage des tetraedres restants
-% fprintf('Retrait des tetraedres exterieurs a la forme 3D termine : %d tetraedres restants. \n',size(Tbis,1));
-% figure;
-% trisurf(tri,X(1,:),X(2,:),X(3,:));
+fprintf('Retrait des tetraedres exterieurs a la forme 3D termine : %d tetraedres restants. \n',size(Tbis,1));
+figure;
+trisurf(Tbis,X(1,:),X(2,:),X(3,:));
 
 % Sauvegarde des donnees
-% save donnees;
+save donnees;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % CONSEIL : A METTRE DANS UN AUTRE SCRIPT %
