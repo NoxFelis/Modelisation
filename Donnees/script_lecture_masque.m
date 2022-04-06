@@ -1,5 +1,5 @@
 %clear all;
-close all;
+%close all;
 nb_images = 36; % Nombre d'images
 
 % chargement des images

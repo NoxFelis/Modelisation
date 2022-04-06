@@ -37,8 +37,10 @@ subplot(2,2,4); imshow(im(:,:,:,25)); title('Image 25');
 K = 108;                                % nombre de superpixels
 N = size(im,2) * size(im,1);            % nombre de pixels tot
 centers1 = zeros(K,5,nb_images);        % valeur et position des centres pour chaque image 
-m = 10;                                 % pour le poids de la distance dans l'algo
-Seuil = 10;                             % seuil de sortie de l'algorithme SLIC
+m = 100;                                % pour le poids de la distance dans l'algo
+                                        % m/S doit être grand car il ne faudrait pas attribuer
+                                        % à x un superpixel trop loin
+Seuil = 0.05;                           % seuil de sortie de l'algorithme SLIC
 max_iter = 100;                         % nombre max d'itération
 kmeans = zeros(r,c,nb_images);          % matrices représentant à quel superpixel appartient chaque pixel pour chaque image
                                         % ainsi que sa couleur associée
@@ -127,72 +129,98 @@ subplot(2,2,4); imshow(imoverlay(im(:,:,:,25),BW25,'red')); title('Image 25 with
                 hold on; plot(centers1(:,5,25),centers1(:,4,25), '.g');
 
 % Algorithme SLIC
-figure1=figure;
-for e=1:1
-    imag = cast(im(:,:,:,e), 'double');
-    % Variables globales
-    E = Inf;                            % Erreur
-    ncenters = centers1(:,:,e);         % centres intermédiaires
-    q = 0;                              % nombre initial de tours
-    nkmeans = kmeans(:,:,e);            % kmeans intermédiaire
-    initial = kmeans(:,:,e);
+% figure1=figure;
+% for e=1:nb_images
+%     imag = cast(im(:,:,:,e), 'double');
+%     % Variables globales
+%     E = Inf;                            % Erreur
+%     ncenters = centers1(:,:,e);         % centres intermédiaires
+%     q = 0;                              % nombre initial de tours
+%     nkmeans = kmeans(:,:,e);            % kmeans intermédiaire
+%     initial = kmeans(:,:,e);
+% 
+%     title('image');
+%     % tant que l'on n'atteint pas le seuil ou le nombre d'itérations max
+%     while (E>Seuil && q<max_iter)
+%         q = q+1;
+%         centers = ncenters;
+%         kmeans_e = nkmeans;
+%         ncenters = zeros(K,5);
+%         nombre = zeros(K,1);
+%         
+%         % Calcul des superpixels
+%         % pour chaque pixel
+%         for i=1:r
+%             for j=1:c
+%                 % on choisit s'il n'y a pas une classe dans un voisinage
+%                 % 2S*2S qui ne serait pas plus proche
+%                 new_class = distance(i,j,imag(i,j,:),centers,S,m,kmeans_e);
+%                 % on met à jour dans nkmeans
+%                 nkmeans(i,j) = new_class;
+%                 % on prépare le calcul des nouveau centres
+%                 ncenters(new_class,:) = ncenters(new_class,:) + [imag(i,j,1) imag(i,j,2) imag(i,j,3) i j];
+%                 nombre(new_class) = nombre(new_class) +1;
+%             end
+%         end
+%         % à enlever, juste de la vérification
+%         %sum(sum(1-(nkmeans==initial)))
+% 
+%         % Mise à jour des centres
+%         ncenters = ncenters./nombre;
+% 
+%         % Calcul de E (erreur résiduelle)
+%         Error = zeros(K,1);
+%         for t=1:K
+%             Error(t) = distance_centers(centers(t,:),ncenters(t,:),S,m);
+%         end
+%         E = sum(Error)/K;
+%         
+%         
+% %         hold off;
+% %         BW = boundarymask(nkmeans);
+% %         imshow(imoverlay(im(:,:,:,e),BW,'red'));
+% %         hold on;
+% %         plot(ncenters(:,5),ncenters(:,4), '.g');
+% %         pause(0.02);
+%         
+%         
+%     end
+%     kmeans(:,:,e) = nkmeans;
+% end
 
-    title('image');
-    % tant que l'on n'atteint pas le seuil ou le nombre d'itérations max
-    while (E>Seuil && q<max_iter)
-        centers = ncenters;
-        kmeans_e = nkmeans;
-        ncenters = zeros(K,5);
-        nombre = zeros(K,1);
-        
-        % Calcul des superpixels
-        % pour chaque pixel
-        for i=1:r
-            for j=1:c
-                % on choisit s'il n'y a pas une classe dans un voisinage
-                % 2S*2S qui ne serait pas plus proche
-                new_class = distance(i,j,imag(i,j,:),centers,S,m,kmeans_e);
-                % on met à jour dans nkmeans
-                nkmeans(r,c) = new_class;
-                % on prépare le calcul des nouveau centres
-                ncenters(new_class,:) = ncenters(new_class,:) + [imag(i,j,1) imag(i,j,2) imag(i,j,3) i j];
-                nombre(new_class) = nombre(new_class) +1;
-            end
-        end
-        % à enlever, juste de la vérification
-        sum(sum(1-(nkmeans==initial)))
-
-        % Mise à jour des centres
-        ncenters = ncenters./nombre;
-
-        % Calcul de E (erreur résiduelle)
-        Error = zeros(K,1);
-        for t=1:K
-            Error(t) = distance_centers(centers(t,:),ncenters(t,:),S,m);
-        end
-        E = max(Error);
-        
-        
-        hold off;
-        BW = boundarymask(nkmeans);
-        imshow(imoverlay(im(:,:,:,e),BW,'red'));
-        hold on;
-        plot(ncenters(:,5),ncenters(:,4), '.g');
-        pause(0.02);
-        
-        q = q+1;
-    end
-    kmeans(:,:,e) = nkmeans;
-    %close;
-end
 
 
+%pause;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % A COMPLETER                                             %
 % Binarisation de l'image à partir des superpixels        %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % ........................................................%
+% au lieu de tout relancer on charge les donnees pour l'exemple
+load donnees;
+
+binary = zeros(N,nb_images);
+for e=1:nb_images
+    kmeans_e = kmeans(:,:,e);
+    kmeans_e = kmeans_e(:);
+    for k=1:K
+        superpixel = centers1(k,:,e);
+        % s'il y a plus de rouge que de bleu
+        if (superpixel(1)>superpixel(3))
+            I = find(kmeans_e == k);
+            binary(I,e) = 1;
+        end
+    end
+end
+binary = reshape(binary,r,c,nb_images);
+
+figure;
+axis on;
+subplot(2,2,1); imshow(binary(:,:,1)); title('Mask 1 created');
+subplot(2,2,2); imshow(binary(:,:,9)); title('Mask 9 created');
+subplot(2,2,3); imshow(binary(:,:,17)); title('Mask 17 created');
+subplot(2,2,4); imshow(binary(:,:,25)); title('Mask 25 created');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % A FAIRE SI VOUS UTILISEZ LES MASQUES BINAIRES FOURNIS   %
@@ -201,8 +229,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 load('mask.mat');
 script_lecture_masque;
-pause
-close all;
+%pause
 
 % Variables de cette partie
 r_depart = floor(r/2);
@@ -281,8 +308,6 @@ for i=1:nb_images
     in2 = isinterior(pgon, vx(2,:),vy(2,:));
     in = in1+in2;
     in = in==2;
-
-
     
     plot(vx(:,in),vy(:,in),'-b',autour_full(:,1),autour_full(:,2),'.r');
     % mise à jour de T pour aller au début du contour prochain
@@ -392,11 +417,11 @@ for i = 1:nb_images
    for k = 1:nb_barycentres
        o = P{i}*C_g(:,:,k);
        o = o./repmat(o(3,:),3,1);
-       imshow(im_mask(:,:,i));
-       hold on;
-       plot(o(2,:),o(1,:),'rx');
-       pause(0.02);
-       hold off;
+%        imshow(im_mask(:,:,i));
+%        hold on;
+%        plot(o(2,:),o(1,:),'rx');
+%        pause(0.02);
+%        hold off;
    end
 end
 
