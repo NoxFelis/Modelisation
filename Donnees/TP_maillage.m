@@ -129,65 +129,66 @@ subplot(2,2,4); imshow(imoverlay(im(:,:,:,25),BW25,'red')); title('Image 25 with
                 hold on; plot(centers1(:,5,25),centers1(:,4,25), '.g');
 
 % Algorithme SLIC
-% figure1=figure;
-% for e=1:[1,9,17,25]
-%     imag = cast(im(:,:,:,e), 'double');
-%     % Variables globales
-%     E = Inf;                            % Erreur
-%     ncenters = centers1(:,:,e);         % centres intermédiaires
-%     q = 0;                              % nombre initial de tours
-%     nkmeans = kmeans(:,:,e);            % kmeans intermédiaire
-%     initial = kmeans(:,:,e);
-% 
-%     title('image');
-%     % tant que l'on n'atteint pas le seuil ou le nombre d'itérations max
-%     while (E>Seuil && q<max_iter)
-%         q = q+1;
-%         centers = ncenters;
-%         kmeans_e = nkmeans;
-%         ncenters = zeros(K,5);
-%         nombre = zeros(K,1);
-%         
-%         % Calcul des superpixels
-%         % pour chaque pixel
-%         for i=1:r
-%             for j=1:c
-%                 % on choisit s'il n'y a pas une classe dans un voisinage
-%                 % 2S*2S qui ne serait pas plus proche
-%                 new_class = distance(i,j,imag(i,j,:),centers,S,m,kmeans_e);
-%                 % on met à jour dans nkmeans
-%                 nkmeans(i,j) = new_class;
-%                 % on prépare le calcul des nouveau centres
-%                 ncenters(new_class,:) = ncenters(new_class,:) + [imag(i,j,1) imag(i,j,2) imag(i,j,3) i j];
-%                 nombre(new_class) = nombre(new_class) +1;
-%             end
-%         end
-%         % à enlever, juste de la vérification
-%         %sum(sum(1-(nkmeans==initial)))
-% 
-%         % Mise à jour des centres
-%         ncenters = ncenters./nombre;
-% 
-%         % Calcul de E (erreur résiduelle)
-%         Error = zeros(K,1);
-%         for t=1:K
-%             Error(t) = distance_centers(centers(t,:),ncenters(t,:),S,m);
-%         end
-%         E = sum(Error)/K;
-%         
-%         
-% %         hold off;
-% %         BW = boundarymask(nkmeans);
-% %         imshow(imoverlay(im(:,:,:,e),BW,'red'));
-% %         hold on;
-% %         plot(ncenters(:,5),ncenters(:,4), '.g');
-% %         pause(0.02);
-%         
-%         
-%     end
-%     kmeans(:,:,e) = nkmeans;
-%     centers1(:,:,e) = ncenters;
-% end
+% Algorithme SLIC
+figure1=figure;
+for e=[1,9,17,25]
+     imag = cast(im(:,:,:,e), 'double');
+     % Variables globales
+     E = Inf;                            % Erreur
+     ncenters = centers1(:,:,e);         % centres intermédiaires
+     q = 0;                              % nombre initial de tours
+     nkmeans = kmeans(:,:,e);            % kmeans intermédiaire
+     initial = kmeans(:,:,e);
+ 
+     title('image');
+     % tant que l'on n'atteint pas le seuil ou le nombre d'itérations max
+     while (E>Seuil && q<max_iter)
+         q = q+1;
+         centers = ncenters;
+         kmeans_e = nkmeans;
+         ncenters = zeros(K,5);
+         nombre = zeros(K,1);
+         
+         % Calcul des superpixels
+         % pour chaque pixel
+         for i=1:r
+             for j=1:c
+                 % on choisit s'il n'y a pas une classe dans un voisinage
+                 % 2S*2S qui ne serait pas plus proche
+                 new_class = distance(i,j,imag(i,j,:),centers,S,m,kmeans_e);
+                 % on met à jour dans nkmeans
+                 nkmeans(i,j) = new_class;
+                 % on prépare le calcul des nouveau centres
+                 ncenters(new_class,:) = ncenters(new_class,:) + [imag(i,j,1) imag(i,j,2) imag(i,j,3)  j];
+                 nombre(new_class) = nombre(new_class) +1;
+             end
+         end
+         % à enlever, juste de la vérification
+         %sum(sum(1-(nkmeans==initial)))
+ 
+         % Mise à jour des centres
+         ncenters = ncenters./nombre;
+ 
+         % Calcul de E (erreur résiduelle)
+         Error = zeros(K,1);
+         for t=1:K
+             Error(t) = distance_centers(centers(t,:),ncenters(t,:),S,m);
+         end
+         E = sum(Error)/K;
+         
+         
+ %         hold off;
+ %         BW = boundarymask(nkmeans);
+ %         imshow(imoverlay(im(:,:,:,e),BW,'red'));
+ %         hold on;
+ %         plot(ncenters(:,5),ncenters(:,4), '.g');
+ %         pause(0.02);
+         
+         
+     end
+     kmeans(:,:,e) = nkmeans;
+     centers1(:,:,e) = ncenters;
+ end
 
 figure
 BW1 = boundarymask(reshape(kmeans(:,:,1),r,c));
