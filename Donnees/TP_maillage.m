@@ -40,7 +40,7 @@ centers1 = zeros(K,5,nb_images);        % valeur et position des centres pour ch
 m = 100;                                % pour le poids de la distance dans l'algo
                                         % m/S doit être grand car il ne faudrait pas attribuer
                                         % à x un superpixel trop loin
-Seuil = 0.05;                           % seuil de sortie de l'algorithme SLIC
+Seuil = 0.5;                           % seuil de sortie de l'algorithme SLIC
 max_iter = 100;                         % nombre max d'itération
 kmeans = zeros(r,c,nb_images);          % matrices représentant à quel superpixel appartient chaque pixel pour chaque image
                                         % ainsi que sa couleur associée
@@ -130,65 +130,65 @@ subplot(2,2,4); imshow(imoverlay(im(:,:,:,25),BW25,'red')); title('Image 25 with
 
 % Algorithme SLIC
 % Algorithme SLIC
-figure1=figure;
-for e=[1,9,17,25]
-     imag = cast(im(:,:,:,e), 'double');
-     % Variables globales
-     E = Inf;                            % Erreur
-     ncenters = centers1(:,:,e);         % centres intermédiaires
-     q = 0;                              % nombre initial de tours
-     nkmeans = kmeans(:,:,e);            % kmeans intermédiaire
-     initial = kmeans(:,:,e);
- 
-     title('image');
-     % tant que l'on n'atteint pas le seuil ou le nombre d'itérations max
-     while (E>Seuil && q<max_iter)
-         q = q+1;
-         centers = ncenters;
-         kmeans_e = nkmeans;
-         ncenters = zeros(K,5);
-         nombre = zeros(K,1);
-         
-         % Calcul des superpixels
-         % pour chaque pixel
-         for i=1:r
-             for j=1:c
-                 % on choisit s'il n'y a pas une classe dans un voisinage
-                 % 2S*2S qui ne serait pas plus proche
-                 new_class = distance(i,j,imag(i,j,:),centers,S,m,kmeans_e);
-                 % on met à jour dans nkmeans
-                 nkmeans(i,j) = new_class;
-                 % on prépare le calcul des nouveau centres
-                 ncenters(new_class,:) = ncenters(new_class,:) + [imag(i,j,1) imag(i,j,2) imag(i,j,3)  j];
-                 nombre(new_class) = nombre(new_class) +1;
-             end
-         end
-         % à enlever, juste de la vérification
-         %sum(sum(1-(nkmeans==initial)))
- 
-         % Mise à jour des centres
-         ncenters = ncenters./nombre;
- 
-         % Calcul de E (erreur résiduelle)
-         Error = zeros(K,1);
-         for t=1:K
-             Error(t) = distance_centers(centers(t,:),ncenters(t,:),S,m);
-         end
-         E = sum(Error)/K;
-         
-         
- %         hold off;
- %         BW = boundarymask(nkmeans);
- %         imshow(imoverlay(im(:,:,:,e),BW,'red'));
- %         hold on;
- %         plot(ncenters(:,5),ncenters(:,4), '.g');
- %         pause(0.02);
-         
-         
-     end
-     kmeans(:,:,e) = nkmeans;
-     centers1(:,:,e) = ncenters;
- end
+% figure1=figure;
+% for e=[1,9,17,25]
+%      imag = cast(im(:,:,:,e), 'double');
+%      % Variables globales
+%      E = Inf;                            % Erreur
+%      ncenters = centers1(:,:,e);         % centres intermédiaires
+%      q = 0;                              % nombre initial de tours
+%      nkmeans = kmeans(:,:,e);            % kmeans intermédiaire
+%      initial = kmeans(:,:,e);
+%  
+%      title('image');
+%      % tant que l'on n'atteint pas le seuil ou le nombre d'itérations max
+%      while (E>Seuil && q<max_iter)
+%          q = q+1;
+%          centers = ncenters;
+%          kmeans_e = nkmeans;
+%          ncenters = zeros(K,5);
+%          nombre = zeros(K,1);
+%          
+%          % Calcul des superpixels
+%          % pour chaque pixel
+%          for i=1:r
+%              for j=1:c
+%                  % on choisit s'il n'y a pas une classe dans un voisinage
+%                  % 2S*2S qui ne serait pas plus proche
+%                  new_class = distance(i,j,imag(i,j,:),centers,S,m,kmeans_e);
+%                  % on met à jour dans nkmeans
+%                  nkmeans(i,j) = new_class;
+%                  % on prépare le calcul des nouveau centres
+%                  ncenters(new_class,:) = ncenters(new_class,:) + [imag(i,j,1) imag(i,j,2) imag(i,j,3) i j];
+%                  nombre(new_class) = nombre(new_class) +1;
+%              end
+%          end
+%          % à enlever, juste de la vérification
+%          %sum(sum(1-(nkmeans==initial)))
+%  
+%          % Mise à jour des centres
+%          ncenters = ncenters./nombre;
+%  
+%          % Calcul de E (erreur résiduelle)
+%          Error = zeros(K,1);
+%          for t=1:K
+%              Error(t) = distance_centers(centers(t,:),ncenters(t,:),S,m);
+%          end
+%          E = sum(Error)/K;
+%          
+%          
+%  %         hold off;
+%  %         BW = boundarymask(nkmeans);
+%  %         imshow(imoverlay(im(:,:,:,e),BW,'red'));
+%  %         hold on;
+%  %         plot(ncenters(:,5),ncenters(:,4), '.g');
+%  %         pause(0.02);
+%          
+%          
+%      end
+%      kmeans(:,:,e) = nkmeans;
+%      centers1(:,:,e) = ncenters;
+%  end
 
 figure
 BW1 = boundarymask(reshape(kmeans(:,:,1),r,c));
@@ -205,7 +205,7 @@ subplot(2,2,3); imshow(imoverlay(im(:,:,:,17),BW17,'red')); title('Image 17 with
 subplot(2,2,4); imshow(imoverlay(im(:,:,:,25),BW25,'red')); title('Image 25 with final superpixels');
                 hold on; plot(centers1(:,5,25),centers1(:,4,25), '.g');
 
-fprintf('Fin de l'algorithme SLIC, cliquez pour passer à la binarisation');
+fprintf('Fin de lalgorithme SLIC, cliquez pour passer à la binarisation\n');
 pause;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % A COMPLETER                                             %
@@ -217,7 +217,7 @@ pause;
 load donnees;
 
 binary = zeros(N,nb_images);
-for e=1:[1,9,17,25]
+for e=[1,9,17,25]
     kmeans_e = kmeans(:,:,e);
     kmeans_e = kmeans_e(:);
     for k=1:K
@@ -238,7 +238,7 @@ subplot(2,2,2); imshow(binary(:,:,9)); title('Mask 9 created');
 subplot(2,2,3); imshow(binary(:,:,17)); title('Mask 17 created');
 subplot(2,2,4); imshow(binary(:,:,25)); title('Mask 25 created');
 
-fprintf('Fin de la binarisation, elle n'est pas conservée pour la suite, cliquez pour passer aux contours');
+fprintf('Fin de la binarisation, elle nest pas conservée pour la suite, cliquez pour passer aux contours\n');
 pause;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -296,7 +296,7 @@ subplot(2,2,3); imshow(im_mask(:,:,17)); title('Mask 17 with boundary');
 subplot(2,2,4); imshow(im_mask(:,:,25)); title('Mask 25 with boundary');
                 hold on; plot(contour25(:,2),contour25(:,1),'g','LineWidth',2);
 
-fprintf('Fin du calcul des contours, cliquez pour passer au squelette');
+fprintf('Fin du calcul des contours, cliquez pour passer au squelette\n');
 pause;
 
 t = 0;                              % sert à noter où dans le vecteur contour nous sommes
@@ -339,7 +339,7 @@ for i=1:nb_images
     hold off
 end
 
-fprintf('Fin du calcul de squelette, cliquez pour passer au calcul des points 3D');
+fprintf('Fin du calcul de squelette, cliquez pour passer au calcul des points 3D\n');
 pause;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -404,7 +404,7 @@ for i = 1:size(X,2)
 end
 axis equal;
 
-fprintf('Fin du calcul des points 3D, cliquez pour passer à la tétraédrisation');
+fprintf('Fin du calcul des points 3D, cliquez pour passer à la tétraédrisation\n');
 pause;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -452,7 +452,7 @@ for i = 1:nb_images
    end
 end
 
-fprintf('Fin de la tétraédrisation, cliquez pour passer au tri des tétraèdres');
+fprintf('Fin de la tétraédrisation, cliquez pour passer au tri des tétraèdres\n');
 pause;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % A DECOMMENTER ET A COMPLETER %
@@ -506,7 +506,7 @@ trisurf(Tbis,X(1,:),X(2,:),X(3,:));
 
 % Sauvegarde des donnees
 save donnees;
-fprintf('Fin du programme et sauvegarde des données, veuillez passer au script TP_Maillage_2.m');
+fprintf('Fin du programme et sauvegarde des données, veuillez passer au script TP_Maillage_2.m\n');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % CONSEIL : A METTRE DANS UN AUTRE SCRIPT %
