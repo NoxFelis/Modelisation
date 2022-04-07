@@ -1,0 +1,9 @@
+Bien qu'il y ait des codes Partie_1 et Partie_3, tout se fait dans les fichiers TP_Maillage et TP_Maillage_2
+
+Pour l'algo de SLIC
+pour le lancer et avoir l'affichage final, il faut décommenter cette partie (elle est commentée car très lente et tout a été sauvegardé dans donnees.mat pour la suite et éviter de tout relancer
+(seul soucis: le vecteur des centres n'a pas été sauvegardé donc pour avoir un affichage correct il faudrait le lancer. Afin d'aller plus vite, j'ai limité le lancement aux images 1, 9, 17 et 25 qui sont celles affichées tout du long pour vérifier le bon fonctionnement du code)
+
+Pour tout le reste, le programme est mis en pause entre chaque partie et il faut tapper un charactère pour passer à la suite
+
+ATTENTION: le fichier donnees.mat était trop grand, nous avons donc décidé de l'enlever et de laisser l'algo de binarisation uniquement pour les matrices 1, 9, 17 et 25. De toute facon la suite de fait avec script_lecture_masque.m

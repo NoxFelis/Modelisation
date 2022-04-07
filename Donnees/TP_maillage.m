@@ -130,7 +130,7 @@ subplot(2,2,4); imshow(imoverlay(im(:,:,:,25),BW25,'red')); title('Image 25 with
 
 % Algorithme SLIC
 % figure1=figure;
-% for e=1:nb_images
+% for e=1:[1,9,17,25]
 %     imag = cast(im(:,:,:,e), 'double');
 %     % Variables globales
 %     E = Inf;                            % Erreur
@@ -186,11 +186,26 @@ subplot(2,2,4); imshow(imoverlay(im(:,:,:,25),BW25,'red')); title('Image 25 with
 %         
 %     end
 %     kmeans(:,:,e) = nkmeans;
+%     centers1(:,:,e) = ncenters;
 % end
 
+figure
+BW1 = boundarymask(reshape(kmeans(:,:,1),r,c));
+BW9 = boundarymask(reshape(kmeans(:,:,9),r,c));
+BW17 = boundarymask(reshape(kmeans(:,:,17),r,c));
+BW25 = boundarymask(reshape(kmeans(:,:,25),r,c));
 
+subplot(2,2,1); imshow(imoverlay(im(:,:,:,1),BW1,'red')); title('Image 1 with final superpixels');
+                hold on; plot(centers1(:,5,1),centers1(:,4,1), '.g');
+subplot(2,2,2); imshow(imoverlay(im(:,:,:,9),BW9,'red')); title('Image 9 with final superpixels');
+                hold on; plot(centers1(:,5,9),centers1(:,4,9), '.g');
+subplot(2,2,3); imshow(imoverlay(im(:,:,:,17),BW17,'red')); title('Image 17 with final superpixels');
+                hold on; plot(centers1(:,5,17),centers1(:,4,17), '.g');
+subplot(2,2,4); imshow(imoverlay(im(:,:,:,25),BW25,'red')); title('Image 25 with final superpixels');
+                hold on; plot(centers1(:,5,25),centers1(:,4,25), '.g');
 
-%pause;
+fprintf('Fin de l'algorithme SLIC, cliquez pour passer à la binarisation');
+pause;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % A COMPLETER                                             %
 % Binarisation de l'image à partir des superpixels        %
@@ -201,7 +216,7 @@ subplot(2,2,4); imshow(imoverlay(im(:,:,:,25),BW25,'red')); title('Image 25 with
 load donnees;
 
 binary = zeros(N,nb_images);
-for e=1:nb_images
+for e=1:[1,9,17,25]
     kmeans_e = kmeans(:,:,e);
     kmeans_e = kmeans_e(:);
     for k=1:K
@@ -221,6 +236,9 @@ subplot(2,2,1); imshow(binary(:,:,1)); title('Mask 1 created');
 subplot(2,2,2); imshow(binary(:,:,9)); title('Mask 9 created');
 subplot(2,2,3); imshow(binary(:,:,17)); title('Mask 17 created');
 subplot(2,2,4); imshow(binary(:,:,25)); title('Mask 25 created');
+
+fprintf('Fin de la binarisation, elle n'est pas conservée pour la suite, cliquez pour passer aux contours');
+pause;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % A FAIRE SI VOUS UTILISEZ LES MASQUES BINAIRES FOURNIS   %
@@ -277,6 +295,9 @@ subplot(2,2,3); imshow(im_mask(:,:,17)); title('Mask 17 with boundary');
 subplot(2,2,4); imshow(im_mask(:,:,25)); title('Mask 25 with boundary');
                 hold on; plot(contour25(:,2),contour25(:,1),'g','LineWidth',2);
 
+fprintf('Fin du calcul des contours, cliquez pour passer au squelette');
+pause;
+
 t = 0;                              % sert à noter où dans le vecteur contour nous sommes
 % pour chaque image
 % ATTENTION TROUVER COMMENT TOURNER L'IMAGE
@@ -317,6 +338,8 @@ for i=1:nb_images
     hold off
 end
 
+fprintf('Fin du calcul de squelette, cliquez pour passer au calcul des points 3D');
+pause;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % A DECOMMENTER ET COMPLETER                              %
@@ -380,6 +403,9 @@ for i = 1:size(X,2)
 end
 axis equal;
 
+fprintf('Fin du calcul des points 3D, cliquez pour passer à la tétraédrisation');
+pause;
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % A COMPLETER                  %
 % Tetraedrisation de Delaunay  %
@@ -417,17 +443,20 @@ for i = 1:nb_images
    for k = 1:nb_barycentres
        o = P{i}*C_g(:,:,k);
        o = o./repmat(o(3,:),3,1);
-%        imshow(im_mask(:,:,i));
-%        hold on;
-%        plot(o(2,:),o(1,:),'rx');
-%        pause(0.02);
-%        hold off;
+        imshow(im_mask(:,:,i));
+        hold on;
+        plot(o(2,:),o(1,:),'rx');
+        pause(0.02);
+        hold off;
    end
 end
 
+fprintf('Fin de la tétraédrisation, cliquez pour passer au tri des tétraèdres');
+pause;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % A DECOMMENTER ET A COMPLETER %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 % Copie de la triangulation pour pouvoir supprimer des tetraedres
 Tbis=triangulation(T.ConnectivityList,T.Points);
 keep = true(size(T,1),1);
@@ -476,6 +505,7 @@ trisurf(Tbis,X(1,:),X(2,:),X(3,:));
 
 % Sauvegarde des donnees
 save donnees;
+fprintf('Fin du programme et sauvegarde des données, veuillez passer au script TP_Maillage_2.m');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % CONSEIL : A METTRE DANS UN AUTRE SCRIPT %
